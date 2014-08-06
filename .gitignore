@@ -1,7 +1,7 @@
 .vimrc
 .azk
-/data
+npm-debug.log
+/node_modules
 /lib
 /package
-/node_modules
-npm-debug.log
+/docs/build

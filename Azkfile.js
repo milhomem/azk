@@ -119,19 +119,28 @@ systems({
   },
 
   docs: {
+    // Dependent systems
+    depends: [],
+    provision: [
+      "virtualenv /azk/pyenv",
+      "./bin/inve pip install Sphinx",
+      "./bin/inve pip install --no-use-wheel CherryPy",
+    ],
+    // More images:  http://images.azk.io
     image: "dockerfile/python",
-    //provision: [
-      //'export INSTALL_DIR=/azk/<%= manifest.dir %>/vendor/python',
-      //'pip install --target=$INSTALL_DIR --install-option="--install-scripts=$INSTALL_DIR/bin" sphinx',
-    //],
     workdir: "/azk/#{manifest.dir}",
+    workdir: "/azk/#{system.name}",
+    shell: "/bin/bash",
+    command: "./bin/inve python index.py",
+    // Mounts folders to assigned paths
     mounts: {
-      "/azk/#{manifest.dir}": ".",
+      "/azk/#{manifest.dir}": path("./docs"),
+      "/azk/pyenv": persistent('pyenv'),
+    }
+    scalable: { default: 1 },
+    http: {
+      domains: [ "#{system.name}.azk.#{azk.default_domain}" ],
     },
-    //envs: {
-      //PYTHONPATH: "/azk/<%= manifest.dir %>/vendor/python",
-      //PATH: "/bin:/sbin:/usr/bin:/usr/sbin:/azk/<%= manifest.dir %>/vendor/python/bin"
-    //}
   },
 });
 
