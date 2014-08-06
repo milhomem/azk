@@ -378,6 +378,15 @@ First [install azk](#install_from_source) in from the source. Now you can run te
   ```
 Note that running these tests requires you to have `azk agent` running.
 
+### Documentation
+
+```bash
+$ cd ~/.azk
+$ azk start docs
+$ azk shell docs -c "./bin/inve make html"
+# access http://docs.azk.azk.dev
+```
+
 ## License
 
 "Azuki", "Azk" and the Azuki logo are copyright (c) 2013-2014 Azuki Serviços de Internet LTDA.
