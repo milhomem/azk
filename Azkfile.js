@@ -21,19 +21,34 @@ systems({
   },
 
   docs: {
+    // Dependent systems
+    depends: [],
+    provision: [
+      "virtualenv /azk/pyenv",
+      //"./bin/inve pip install mkdocs",
+      //"./bin/inve pip install --no-use-wheel CherryPy",
+      //"./bin/inve pip install sphinx_rtd_theme",
+    ],
+    // More images:  http://images.azk.io
     image: "dockerfile/python",
-    //provision: [
-      //'export INSTALL_DIR=/azk/<%= manifest.dir %>/vendor/python',
-      //'pip install --target=$INSTALL_DIR --install-option="--install-scripts=$INSTALL_DIR/bin" sphinx',
-    //],
-    workdir: "/azk/<%= manifest.dir %>",
+    workdir: "/azk/#{manifest.dir}",
+    shell: "/bin/bash",
+    command: "./docs/bin/inve mkdocs serve --dev-addr=0.0.0.0:$HTTP_PORT",
+    // Mounts folders to assigned paths
     mount_folders: {
-      ".": "/azk/<%= manifest.dir %>",
+      './': "/azk/#{manifest.dir}",
     },
-    //envs: {
-      //PYTHONPATH: "/azk/<%= manifest.dir %>/vendor/python",
-      //PATH: "/bin:/sbin:/usr/bin:/usr/sbin:/azk/<%= manifest.dir %>/vendor/python/bin"
-    //}
+    scalable: { default: 1 },
+    http: {
+      hostname: "#{system.name}.azk.#{azk.default_domain}",
+    },
+    ports: {
+      http: "8080/tcp"
+    },
+    persistent_folders: [ "/azk/pyenv" ],
+    envs: {
+      TERM: "xterm-256color",
+    }
   },
 
   dns: {

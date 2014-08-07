@@ -112,8 +112,24 @@ module.exports = function(grunt) {
           'spec/**/*.js',
         ],
         tasks: ['clear', 'newer:traceur']
+      },
+
+      docs: {
+        files: [
+          'Gruntfile.js',
+          'mkdocs.yml',
+          'docs/**/*.md',
+        ],
+        tasks: ["exec:touch_doc"],
       }
     },
+
+    exec: {
+      touch_doc: {
+        cmd: "azk",
+        args: ["shell", "-t", "-c", "echo \\\"touch docs/index.md\\\"; touch docs/index.md"],
+      }
+    }
   });
 
   // load all grunt tasks matching the `grunt-*` pattern
@@ -124,6 +140,7 @@ module.exports = function(grunt) {
     process.stdout.write('\u001B[2J\u001B[0;0f');
   });
 
+  grunt.registerTask('docs', ['watch:docs']);
   grunt.registerTask('test', ['env:test', 'clear', 'newer:traceur', 'mochaTest:test']);
   grunt.registerTask('slow_test', ['env:test', 'clear', 'newer:traceur', 'mochaTest:slow_test']);
   grunt.registerTask('compile', ['clear', 'newer:traceur', 'watch:traceur']);

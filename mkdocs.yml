@@ -1,0 +1,12 @@
+site_name: Azk
+site_author: Azuki
+repo_url: https://github.com/azukiapp/azk/
+site_favicon: ico/favicon.png
+pages:
+  - [index.md, Home]
+  - [azkfile.md, Azkfile.js]
+theme: readthedocs
+extra_css:
+  - assets/prism.css
+extra_javascript:
+  - assets/prism.js
