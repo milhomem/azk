@@ -125,10 +125,10 @@ systems({
       "virtualenv /azk/pyenv",
       "./bin/inve pip install Sphinx",
       "./bin/inve pip install --no-use-wheel CherryPy",
+      "./bin/inve pip install sphinx_rtd_theme",
     ],
     // More images:  http://images.azk.io
-    image: "dockerfile/python",
-    workdir: "/azk/#{manifest.dir}",
+    image: "azukiapp/python-pandoc",
     workdir: "/azk/#{system.name}",
     shell: "/bin/bash",
     command: "./bin/inve python index.py",
@@ -141,6 +141,9 @@ systems({
     http: {
       domains: [ "#{system.name}.azk.#{azk.default_domain}" ],
     },
+    envs: {
+      TERM: "xterm-256color",
+    }
   },
 });
 
