@@ -1,4 +1,4 @@
-import { _, path, config, t, async } from 'azk';
+import { _, path, config, t, async, defer } from 'azk';
 import { Command, Helpers } from 'azk/cli/command';
 import { Manifest } from 'azk/manifest';
 import docker from 'azk/docker';
@@ -27,18 +27,23 @@ class Cmd extends Command {
       var tty_default = opts.t || !_.isString(opts.command)
       var tty = (opts.T) ? (opts.t || false) : tty_default;
 
+      var stdin = this.stdin();
+      stdin.custom_pipe = () => { };
+
       var options  = {
         interactive: tty,
         pull   : this.stdout(),
         stdout : this.stdout(),
         stderr : this.stderr(),
-        stdin  : this.stdin(),
+        stdin  : stdin,
         workdir: opts.cwd || null,
       }
 
       // Support extra envs, ports and mount volumes
-      options.envs    = this._parse_option(opts.env  , /.*=.*/, '=', 'invalid_env');
-      options.volumes = this._parse_option(opts.mount, /.*=.*/, '=', 'invalid_mount');
+      options.envs   = this._parse_option(opts.env  , /.+=.+/, '=', 'invalid_env');
+      options.mounts = this._parse_option(opts.mount, /.+:.+:?.*/, ':', 'invalid_mount', (opts) => {
+        return { type: (opts[2] ? opts[1] : 'path'), value: (opts[2] ? opts[2] : opts[1]) };
+      });
 
       var cmd = [opts.shell || system.shell];
       if (opts.command) {
@@ -47,20 +52,57 @@ class Cmd extends Command {
       }
 
       // Remove container before run
-      options.remove == opts.remove;
-      return yield system.runShell(cmd, options);
+      options.remove = opts.remove;
+
+      var result = defer((resolver, reject) => {
+        var escape = (key, container) => {
+          if (key === ".") {
+            process.nextTick(() => {
+              docker.getContainer(container).stop({ t: 5000 }).fail(reject);
+            });
+            return true;
+          }
+          return false;
+        };
+
+        system.runShell(cmd, options).
+          progress(Helpers.escapeCapture(escape)).
+          then(resolver, reject);
+      });
+
+      result = yield result.fail((error) => {
+        return this.parseError(error);
+      });
+
+      return result.code;
     }).progress(progress);
   }
 
-  _parse_option(option, regex, split, fail) {
+  parseError(error) {
+    if (error.statusCode) {
+      if (error.statusCode === 404 && error.reason === "no such container") {
+        this.fail("commands.shell.ended.removed");
+        return { code: 127 }
+      }
+    } else if (error.code === 'ECONNRESET') {
+      this.fail("commands.shell.ended.docker_end");
+      return { code: 127 }
+    } else if (error.code === 'ECONNREFUSED') {
+      this.fail("commands.shell.ended.docker_notfound");
+      return { code: 127 }
+    }
+    throw error;
+  }
+
+  _parse_option(option, regex, split, fail, format = null) {
     var result = {};
     for(var j = 0; j < option.length; j++) {
       var opt = option[j];
       if (opt.match(regex)) {
-        opt = opt.split('=');
-        result[opt[0]] = opt[1];
+        opt = opt.split(split);
+        result[opt[0]] = format ? format(opt) : opt[1];
       } else {
-        this.fail('commands.shell.' + fail, { opt });
+        this.fail('commands.shell.' + fail, { value: opt });
         return 1;
       }
     }
@@ -72,7 +114,7 @@ export function init(cli) {
   (new Cmd('shell [system]', cli))
     .addOption(['-T'])
     .addOption(['-t'])
-    .addOption(['--rm', '-r'], { default: true })
+    .addOption(['--remove', '--rm', '-r'], { default: true })
     .addOption(['--image', '-i'], { type: String })
     .addOption(['--command', '-c'], { type: String })
     .addOption(['--shell'], { type: String })

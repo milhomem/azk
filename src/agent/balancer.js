@@ -88,13 +88,13 @@ var Balancer = {
   },
 
   start_dns(ip, port) {
-    return this._runSystem('dns', {
+    return this._run_system('dns', {
       wait: false,
     });
   },
 
   start_socat(ip, port) {
-    return this._runSystem('balancer-redirect', {
+    return this._run_system('balancer-redirect', {
       wait: true,
       envs: {
         BALANCER_IP: ip,
@@ -160,30 +160,12 @@ var Balancer = {
     if (this.isRunnig()) {
       log.debug("call to stop balancer");
       return Tools.async_status("balancer", this, function* (change_status) {
-        yield defer((resolve) => {
-          if (this.hipache && this.hipache.running) {
-            change_status("stopping_hipache");
-            this.hipache.on('stop', () => {
-              change_status("stoped_hipache");
-              resolve();
-            });
-            process.kill(this.hipache.pid);
-          } else {
-            resolve();
-          }
-        });
-        yield defer((resolve) => {
-          if (this.memcached && this.memcached.running) {
-            change_status("stopping_memcached");
-            this.memcached.on('stop', () => {
-              change_status("stoped_memcached");
-              resolve();
-            });
-            process.kill(this.memcached.pid);
-          } else {
-            resolve();
-          }
-        });
+        yield Q.all([
+          this._stop_system('balancer-redirect', change_status),
+          this._stop_system('dns', change_status),
+        ]);
+        yield this._stop_sub_service("hipache", change_status);
+        yield this._stop_sub_service("memcached", change_status);
       });
     } else {
       return Q();
@@ -208,8 +190,7 @@ var Balancer = {
   },
 
   _waitDocker() {
-    var address = url.parse(config("docker:host"));
-    var promise = net.waitService(address.hostname, address.port, 5, { context: "dns" });
+    var promise = net.waitService(config("docker:host"), 5, { context: "dns" });
     return promise.then((success) => {
       if (!success) {
         throw new AgentStartError(t(errors.not_connect_docker));
@@ -218,7 +199,8 @@ var Balancer = {
     });
   },
 
-  _runSystem(system_name, options = {}) {
+  // TODO: check if system is running
+  _run_system(system_name, options = {}) {
     return async(this, function* () {
       var system  = this._getSystem(system_name);
 
@@ -232,10 +214,26 @@ var Balancer = {
         output += data.toString();
       });
 
+      yield system.stop();
       var result = yield system.scale(1, options);
+
       if (!result) {
-        throw new Error('Fail to start balancer: ' + output);
+        throw new Error(`Fail to start balancer (${system_name}): ${output}`);
       }
+    });
+  },
+
+  _stop_system(system_name, change_status) {
+    return async(this, function* () {
+      var system = this._getSystem(system_name);
+
+      // Wait docker
+      yield this._waitDocker();
+
+      // Stop
+      change_status("stoping_" + system_name);
+      yield system.stop();
+      change_status("stoped_" + system_name);
     });
   },
 
@@ -256,12 +254,30 @@ var Balancer = {
     });
   },
 
+  _stop_sub_service(sub, change_status) {
+    return defer((resolve) => {
+      var service = this[sub];
+      if (service && service.running) {
+        change_status("stopping_" + sub);
+        service.on('stop', () => {
+          change_status("stoped_" + sub);
+          resolve();
+        });
+        process.kill(service.pid);
+      } else {
+        resolve();
+      }
+    });
+  },
+
   _check_config(ip, port, memcached_socket) {
-    var file   = config('paths:balancer_file');
+    var file = config('paths:balancer_file');
+    var log  = path.join(config('paths:logs'), "hipache_access.log");
 
     var data = {
+      user: process.getuid(),
       server: {
-        accessLog: "./data/logs/hipache_access.log",
+        accessLog: log,
         workers: 3,
         maxSockets: 100,
         deadBackendTTL: 30

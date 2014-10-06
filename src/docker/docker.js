@@ -97,6 +97,14 @@ export class Container extends Utils.qify('dockerode/lib/container') {
       return annotations;
     }, { azk: {} });
   }
+
+  static envsFromAnnotations(annotations = { azk: {}}) {
+    return _.reduce(annotations.azk, (envs, value, key) => {
+      if (key == 'azk') key = "env";
+      envs[`AZK_${key.toUpperCase()}`] = value;
+      return envs;
+    }, {});
+  }
 }
 
 export class Docker extends Utils.qify('dockerode') {
@@ -155,15 +163,5 @@ export class Docker extends Utils.qify('dockerode') {
 
   run(...args) {
     return run(this, Container, ...args);
-  }
-
-  // TODO: Add test
-  resolvePath(target) {
-    target = Utils.resolve(target);
-    if (config('agent:requires_vm')) {
-      target = path.join(config('agent:vm:mount_point'), target);
-    }
-
-    return target;
   }
 }

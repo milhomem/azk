@@ -1,4 +1,4 @@
-import { _, async, config } from 'azk';
+import { _, async, config, utils } from 'azk';
 var path = require('path');
 
 function new_resize(container) {
@@ -15,7 +15,8 @@ function new_resize(container) {
 }
 
 export function run(docker, Container, image, cmd, opts = { }) {
-  var container = null;
+  var container   = null;
+  var docker_opts = opts.docker || { start: {}, create: {} };
 
   opts.stdout = opts.stdout || process.stdout;
   opts.stderr = opts.stderr || opts.stdout;
@@ -32,13 +33,9 @@ export function run(docker, Container, image, cmd, opts = { }) {
 
   // Volumes
   var volumes = {}, v_binds = [];
-  _.each(opts.volumes || {}, (point, target) => {
+  _.each(opts.volumes || {}, (target, point) => {
     volumes[point] = {};
-    v_binds.push([target, point, 'remote']);
-  });
-  _.each(opts.local_volumes || {}, (point, target) => {
-    volumes[point] = {};
-    v_binds.push([target, point, 'local']);
+    v_binds.push( `${target}:${point}` );
   });
 
   // Ports
@@ -49,13 +46,17 @@ export function run(docker, Container, image, cmd, opts = { }) {
   });
 
   // Annotations
-  var Annotations = opts.annotations || { azk : {} };
-  Annotations.azk.type = Annotations.azk.type || "run";
+  var annotations = opts.annotations || { azk : {} };
+  annotations.azk.type = annotations.azk.type || "run";
 
   // Container name and envs
-  var name = opts.name || Container.serializeAnnotations(Annotations);
-  opts.env = opts.env  || {};
-  opts.env['AZK_NAME'] = name;
+  var name = opts.name || Container.serializeAnnotations(annotations);
+  var envs = _.merge(Container.envsFromAnnotations(annotations), {
+    AZK_NAME: name,
+     AZK_ENV: config('docker:namespace').split('.')[1],
+  })
+  opts.env = _.merge(envs, opts.env || {});
+
   var env  = _.reduce(opts.env, function(sum, value, key) {
     sum.push(key + "=" + value)
     return sum
@@ -78,10 +79,10 @@ export function run(docker, Container, image, cmd, opts = { }) {
   }
 
   return async(docker, function* (notify) {
-    container = yield this.createContainer(optsc);
+    container = yield this.createContainer(_.merge(optsc, docker_opts.create || {}));
 
-    var c_notify = (type) => {
-      return notify({ type, context: "container_run", id: container.id });
+    var c_notify = (type, ...data) => {
+      return notify({ type, context: "container_run", id: container.id, data: data });
     }
     c_notify("created");
     notify({type: "created", id: container.id});
@@ -114,21 +115,25 @@ export function run(docker, Container, image, cmd, opts = { }) {
             opts.stdin.setRawMode(true)
           } catch(err) {};
         }
-        opts.stdin.pipe(stream);
-      }
-    }
 
-    // Make start options
-    for(var i = 0; i < v_binds.length; i++) {
-      var target = v_binds[i][0];
-      if (v_binds[i][2] == "remote") {
-        target = docker.resolvePath(target);
+        if (opts.stdin.custom_pipe) {
+          opts.stdin.custom_pipe(stream);
+        } else {
+          opts.stdin.pipe(stream);
+        }
+
+        c_notify("stdin_pipe", { stdin: opts.stdin, stream });
       }
-      v_binds[i] = target + ':' + v_binds[i][1];
     }
 
     // Start container
-    yield container.start({ "Binds": v_binds, PortBindings: p_binds, Dns: nameservers });
+    var start_opts = {
+      Dns: nameservers,
+      Binds: v_binds,
+      PortBindings: p_binds,
+    };
+
+    yield container.start(_.merge(start_opts, docker_opts.start || {}));
     c_notify("started");
 
     if (!daemon) {

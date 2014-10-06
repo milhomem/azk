@@ -1,8 +1,9 @@
 import { Q, _, fs, defer, config } from 'azk';
 
+var url         = require('url');
 var nativeNet   = require('net');
 var portrange   = config("agent:portrange_start");
-var nameservers = [];
+var nameservers = null;
 
 var net = {
   getPort() {
@@ -32,32 +33,46 @@ var net = {
   },
 
   nameServers() {
-    if (_.isEmpty(nameservers)) {
-      var lines = fs.readFileSync("/etc/resolv.conf").toString().split("\n");
-      _.each(lines, (line) => {
-        if (line.match(/^nameserver.*$/)) {
-          nameservers.push(line.replace(/^nameserver\s{1,}(.*)/, "$1"));
-        }
-      });
-      nameservers.unshift(config("agent:dns:ip"));
+    if (nameservers == null) {
+      nameservers = [config("agent:dns:ip")];
+
+      var file = "/etc/resolv.conf";
+      if (fs.existsSync(file)) {
+        var lines = fs.readFileSync(file).toString().split("\n");
+        _.each(lines, (line) => {
+          if (line.match(/^nameserver.*$/)) {
+            nameservers.push(line.replace(/^nameserver\s{1,}(.*)/, "$1"));
+          }
+        });
+      }
     }
     return nameservers;
   },
 
-  waitService(host, port, retry = 15, opts = {}) {
+  waitService(address, retry = 15, opts = {}) {
     opts = _.defaults(opts, {
       timeout: 10000,
       retry_if: () => { return Q(true); }
     });
 
+    // Parse options to try connect
+    address = url.parse(address);
+    address = {
+      host: address.hostname,
+      port: address.port,
+      path: address.protocol == "unix:" ? address.path : null
+    };
+
     return defer((resolve, reject, notify) => {
       var client   = null;
       var attempts = 1, max = retry;
       var connect  = () => {
-        notify({ type: 'try_connect', attempts, max, host, port, context: opts.context });
         var t = null;
+        notify(_.merge({
+          type: 'try_connect', attempts, max, context: opts.context
+        }, address));
 
-        client = nativeNet.connect({ host, port}, function() {
+        client = nativeNet.connect(address, function() {
           client.end();
           clearTimeout(t);
           resolve(true);
@@ -67,7 +82,7 @@ var net = {
           client.end();
 
           opts.retry_if().then((result) => {
-            if (attempts > max || !result) return resolve(false);
+            if (attempts >= max || !result) return resolve(false);
             attempts += 1;
             connect();
           }, () => resolve(false));

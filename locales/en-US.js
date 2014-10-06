@@ -1,7 +1,9 @@
 require('colors');
 
 var version = "Shows azk version";
+var verbose = "Sets the level of detail";
 var systems_options = "Targets systems of action";
+var reprovision = "Force the provisioning actions before starting an instance";
 
 module.exports = {
   errors: {
@@ -93,6 +95,7 @@ module.exports = {
     system_name_invalid: "The system name `%(system)s` is not valid.",
     depends_not_declared: "The `%(system)s` system depends on the `%(depend)s` system, which was not stated.",
     balancer_depreciation: "The `balancer` option used in the `%(system)s` is deprecated, use `http` and `scalable` to replace",
+    invalid_default: "Unable to set the system `%(system)s` as a default because it was not declared",
   },
 
   system: {
@@ -116,8 +119,8 @@ module.exports = {
         '$ azk agent start --daemon',
         '$ azk shell --image azukiapp/busybox',
         '$ azk shell --mount ~/Home:/azk/user -e HOME=/azk/user',
-        '$ azk status -s [system_name]',
-        '$ azk scale --instances 2',
+        '$ azk status [system_name]',
+        '$ azk scale [system_name] 2',
       ],
     },
     version: {
@@ -135,17 +138,45 @@ module.exports = {
             stop: "Stop the azk agent running in the background",
           }
         },
+        'reload-vm': "Reloads the virtual machine settings",
         daemon: "Runs azk agent in background mode",
       }
     },
+    configs: {
+      description: "Shows the azk configs values",
+    },
+    docker: {
+      description: "Alias for calling the docker in 'azk' scope configurations",
+    },
+    doctor: {
+      description: "Shows an analysis of the health of `azk`",
+      options: {
+        logo: "Shows the `azk` logo before show health informations",
+      },
+    },
+    info: {
+      description: "Shows systems informactions for the current `Azkfile.js`",
+      options: {
+        colored: "Outputs with colors",
+      },
+    },
+    logs: {
+      description: "Shows logs for the systems",
+      options: {
+        follow: "Follow log output",
+        lines: "Output the specified number of lines at the end of logs",
+        timestamps: "Show timestamps",
+      },
+    },
     shell: {
       description: "Initializes a shell with instance context or runs a arbitrary command",
-      invalid_mount: "Invalid mount parameter: `%(point)s`, use `origin:target`",
-      invalid_env: "Invalid env variable: `%(variable)s`, use `VARIABLE=VALUE`",
+      invalid_mount: "Invalid mount parameter: `%(value)s`, use `point:[path:|persitent:]origin`",
+      invalid_env: "Invalid env variable: `%(value)s`, use `VARIABLE=VALUE`",
       options: {
         T: "Disables pseudo-tty allocation",
         t: "Forces pseudo-tty allocation",
         system  : "A system context to execute a shell or command",
+        remove  : "Removes shell instances after exit shell or command",
         command : "Runs a specific command",
         shell   : "The path to shell binary",
         verbose : "Shows details about command execution",
@@ -154,10 +185,15 @@ module.exports = {
         image   : "Defines the image in which the command will be executed",
         env     : "Additional environment variables",
       },
+      ended: {
+        removed: "finished, because the container was removed",
+        docker_end: "finished, because the docker was finalized",
+        docker_notfound: "finished, because docker not found",
+      },
       examples: [
         '$ azk shell --shell /bin/bash',
-        '$ azk shell --mount /:/azk/root -e RAILS_ENV=dev',
-        '$ azk shell -c "ls -l /"',
+        '$ azk shell [system_name] --mount /=/azk/root -e RAILS_ENV=dev',
+        '$ azk shell [system_name] -c "ls -l /"',
         '$ azk shell --image azukiapp/budybox -t -c "/bin/bash"',
       ]
     },
@@ -188,14 +224,16 @@ module.exports = {
       description: "Starts an instance of the system(s)",
       already: "System `%(name)s` already started",
       options: {
-        system: systems_options,
+        verbose: verbose,
+        reprovision: reprovision,
       }
     },
     stop: {
       description: "Stops an instance of the system(s)",
       not_running: "System `%(name)s` not running",
       options: {
-        system: systems_options,
+        verbose: verbose,
+        remove: "Removes the instances before stop",
       }
     },
     scale: {
@@ -210,14 +248,23 @@ module.exports = {
       scaling_up  : "↑".green   + " scaling `"      + "%(system)s".blue  + "` system %(instances)s...",
       scaling_down: "↓".red     + " scaling `"      + "%(system)s".blue  + "` system %(instances)s...",
       options: {
-        system: systems_options,
-        instances: "Number of instances",
+        remove: "Removes the instances before stop",
+        verbose: verbose,
+      }
+    },
+    restart: {
+      description: "Stops all system and starts again",
+      options: {
+        verbose: verbose,
+        reprovision: reprovision,
       }
     },
     reload: {
       description: "Stops all system, re-provisions and starts again",
+      deprecation: "`reload` this deprecated, use restart",
       options: {
-        system: systems_options,
+        verbose: verbose,
+        reprovision: reprovision,
       }
     },
     up: {
@@ -242,6 +289,7 @@ module.exports = {
       // TODO not_running
       not_runnig   : "virtual machine is not running, try `azk vm start`.",
       error        : "vm error: %(error)s.",
+      not_requires : "this system not requires virtual machine, to try force this behavior set `AZK_USE_VM=true`",
     }
   },
 

@@ -149,6 +149,10 @@ function config_disks(name, boot, data) {
   });
 }
 
+function acpipowerbutton(name) {
+  return exec('controlvm', name, 'acpipowerbutton');
+}
+
 var vm = {
   info(vm_name) {
     return machine.info(vm_name).then((info) => {
@@ -177,8 +181,8 @@ var vm = {
 
       var cmd = [
         "--ostype", "Linux26_64",
-        "--cpus", os.cpus().length,
-        "--memory", Math.floor(os.totalmem()/1024/1024/4),
+        "--cpus", config("agent:vm:cpus"),
+        "--memory", config("agent:vm:memory"),
         "--vram", "9",
         "--rtcuseutc", "on",
         "--acpi", "on",
@@ -241,13 +245,26 @@ var vm = {
     });
   },
 
-  stop(vm_name) {
+  stop(vm_name, force = false) {
     log.debug("call to stop vm %s", vm_name);
+
     return Tools.async_status("vm", this, function* (status_change) {
       var info = yield vm.info(vm_name);
       if (info.running) {
         status_change("stoping");
-        yield instance.stop(vm_name);
+
+        if (force) {
+          yield instance.stop(vm_name);
+        } else {
+          yield acpipowerbutton(vm_name);
+        }
+
+        // Wait for shutdown
+        while(true) {
+          info = yield this.info(vm_name);
+          if (!info.running) break;
+        }
+
         status_change("stoped");
         return true;
       }

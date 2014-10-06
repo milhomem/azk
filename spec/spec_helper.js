@@ -3,7 +3,9 @@ require('source-map-support').install();
 import { Q, Azk, pp, _, config, t, async } from 'azk';
 import Utils from 'azk/utils';
 import { set as configSet } from 'azk/config';
-import { VM } from 'azk/agent/vm';
+//import { VM } from 'azk/agent/vm';
+import { Client } from 'azk/agent/client';
+import { AgentNotRunning } from 'azk/utils/errors';
 
 var chai  = require('chai');
 var tmp   = require('tmp');
@@ -12,9 +14,9 @@ var qfs   = require('q-io/fs');
 var touch = require('touch');
 
 // Chai extensions
-require("mocha-as-promised")();
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
+chai.config.includeStack = true
 
 import capture_io from 'azk/utils/capture_io'
 var MemoryStream  = require('memorystream');
@@ -30,6 +32,12 @@ var Helpers = {
     });
   },
 
+  tmpFile(opts = { prefix: "azk-test-"}) {
+    return Q.nfcall(tmp.file, opts).spread((file) => {
+      return Utils.resolve(file);
+    });
+  },
+
   touchSync(path) {
     return touch.sync(path);
   },
@@ -42,9 +50,9 @@ var Helpers = {
     });
   },
 
-  fixture_path(fixture) {
+  fixture_path(...fixture) {
     return Utils.resolve(
-      '.', 'spec', 'fixtures', fixture
+      '.', 'spec', 'fixtures', ...fixture
     );
   },
 
@@ -54,25 +62,22 @@ var Helpers = {
 
   escapeRegExp(...args) {
     return Utils.escapeRegExp(...args);
+  },
+
+  describeSkipVm(...args) {
+    return config('agent:requires_vm') ? describe(...args) : describe.skip(...args);
   }
 }
 
 // In specs the virtual machine is required
 before(() => {
   console.log(t('test.before'));
-  console.log(`  ${t('test.check_vm')}`);
 
-  var vm_name = config("agent:vm:name");
-  return Q.async(function* () {
-    var installed = yield VM.isInstalled(vm_name);
-    var running   = (installed) ? yield VM.isRunnig(vm_name) : false;
-
-    if (!installed) {
-      throw new Error(t("commands.vm.not_installed"));
-    } else if (!running) {
-      throw new Error(t("commands.vm.not_runnig"));
+  return Client.status().then((status) => {
+    if (!status.agent) {
+      throw new AgentNotRunning();
     }
-  })();
+  });
 });
 
 // Helpers

@@ -4,6 +4,7 @@ import { runInNewContext, createScript } from 'vm';
 import { System } from 'azk/system';
 import { createSync as createCache } from 'fscache';
 import { sync as mkdir } from 'mkdirp';
+import { Validate } from 'azk/manifest/validate';
 import { ManifestError, ManifestRequiredError, SystemNotFoundError } from 'azk/utils/errors';
 import Utils from 'azk/utils';
 
@@ -12,9 +13,21 @@ var check     = require('syntax-error');
 var tsort     = require('gaia-tsort');
 
 var ManifestDsl = {
+  console: console,
   require: require,
   env: process.env,
+  disable: null,
 
+  // Mounts
+  path(folder) {
+    return { type: 'path', value: folder }
+  },
+
+  persistent(name) {
+    return { type: 'persistent', value: name }
+  },
+
+  // Systems
   system(name, data) {
     this.addSystem(name, data);
   },
@@ -25,6 +38,7 @@ var ManifestDsl = {
     });
   },
 
+  // Extra options
   addImage(name, image) {
     this.images[name] = image;
   },
@@ -92,16 +106,21 @@ export class Manifest {
     if (required && !cwd)
       throw new Error("Manifest class require a project path");
 
-    this.images  = {};
-    this.systems = {};
-    this.bins    = {};
-    this.default = null;
-    this.file    = file || Manifest.find_manifest(cwd);
+    this.images   = {};
+    this.systems  = {};
+    this.bins     = {};
+    this._default = null;
+    this.file     = file || Manifest.find_manifest(cwd);
 
     if (required && !this.exist)
       throw new ManifestRequiredError(cwd);
 
     this.meta    = new Meta(this);
+  }
+
+  // Validate
+  validate(...args) {
+    return Validate.analyze(this, ...args);
   }
 
   parse() {
@@ -143,7 +162,7 @@ export class Manifest {
     }
 
     this.systems[name] = data;
-    if (!this.default) this.default = name;
+    if (!this._default) this._default = name;
 
     return this;
   }
@@ -170,6 +189,21 @@ export class Manifest {
       throw new SystemNotFoundError(this.file, name);
 
     return sys;
+  }
+
+  getSystemsByName(names) {
+    var systems_name = this.systemsInOrder();
+
+    if (_.isString(names) && !_.isEmpty(names)) {
+      names = _.isArray(names) ? names : names.split(',');
+      _.each(names, (name) => this.system(name, true));
+      systems_name = _.intersection(systems_name, names);
+    }
+
+    return _.reduce(systems_name, (systems, name) => {
+      systems.push(this.system(name, true));
+      return systems;
+    }, []);
   }
 
   systemsInOrder(requireds = []) {
@@ -241,11 +275,25 @@ export class Manifest {
     return this.meta.clean(...args);
   }
 
-  // Getters
-  get systemDefault() {
-    return this.system(this.default);
+  // Default system
+  set default(nameOrSystem) {
+    if (nameOrSystem instanceof System) {
+      nameOrSystem = nameOrSystem.name;
+    }
+
+    if (!(this.systems[nameOrSystem] instanceof System)) {
+      var msg = t('manifest.invalid_default', { system: nameOrSystem });
+      throw new ManifestError(this.file, msg);
+    }
+
+    this._default = nameOrSystem;
   }
 
+  get systemDefault() {
+    return this.system(this._default);
+  }
+
+  // Getters
   get manifestPath() {
     return this.cwd;
   }
@@ -302,9 +350,9 @@ export class Manifest {
     return manifest.addSystem("--tmp--", {
       image: image,
       workdir: "/azk/#{manifest.dir}",
-      mount_folders: {
-        ".": "/azk/#{manifest.dir}",
-      },
+      mounts: {
+        "/azk/#{manifest.dir}": "#{manifest.path}"
+      }
     });
   }
 }

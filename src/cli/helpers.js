@@ -87,20 +87,42 @@ var Helpers = {
     }
   },
 
-  getSystemsByName(manifest, names) {
-    var systems_name = manifest.systemsInOrder();
+  escapeCapture(callback) {
+    // Escape sequence
+    var escapeBuffer = false;
+    var escape = false;
 
-    if (_.isString(names) && !_.isEmpty(names)) {
-      systems_name = _.intersection(
-        systems_name,
-        _.isArray(names) ? names : names.split(',')
-      );
+    return (event) => {
+      if (event.type == "stdin_pipe") {
+        var stdin  = event.data[0].stdin;
+        var stream = event.data[0].stream;
+        var container = event.id;
+        var stopped = false;
+
+        stdin.on('data', function (key) {
+          if (stopped) return false;
+
+          var ch = key.toString(stdin.encoding || 'utf-8');
+
+          if (escapeBuffer && ch === '~') {
+            escapeBuffer = false;
+            escape = true;
+          } else if(ch === '\r') {
+            escapeBuffer = true;
+            stream.write(key);
+          } else {
+            if (escape) {
+              stopped = callback(ch, container);
+              escape = false;
+            } else {
+              stream.write(key);
+            }
+            escapeBuffer = false;
+          }
+        });
+      }
+      return true;
     }
-
-    return _.reduce(systems_name, (systems, name) => {
-      systems.push(manifest.system(name, true));
-      return systems;
-    }, []);
   }
 }
 

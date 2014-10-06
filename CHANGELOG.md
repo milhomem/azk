@@ -1,11 +1,43 @@
 # Changelog
 
-## v0.4.2-dev
+## v0.6.0 - dev
+
+* Enhancements
+  * [Manifest] Replacing `mount_folders` and `persistent_folders` for `mounts`;
+
+## v0.5.1 - dev
+
+## v0.5.0 - (2014-03-09)
+
+* Bug
+  * [Cmds] Fixing the passing of parameters to the docker in `adocker`.
+  * [Cmds] Now when the docker or agent is finalized the `shell` is no longer blocked.
+  * [Vm] In place of the forced shutdown `poweroff` now seek to use the safe shutdown with `acpipoweroff`.
+  * [Cmds] Fixing bug that prevented `azk` be used offline.
+
+* Enhancements
+  * [Manifest] Adding support `docker_extra`
+  * [Manifest] Adding support to 'disable' value in ports.
+  * [Kernel] Now `azk` supports Linux \o/
+  * [Kenrel] You can now use the AZK to test and develop the AZK for Linux (see Azkfile.js).
+  * [Cmds] Now supports the `ssh escape sequence` in `shell` command.
+
+* Deprecations
+  * [Agent] Daemon option now is default.
+  * [Cmds] The command `reload` is deprecated and will be removed in the future. Use `restart` in place.
+
+## v0.4.2 (2014-20-08)
+
+* Bug
+  * [Cmds] Fixing a `cd` bug in `docker` command.
 
 * Enhancements
   * [Cli] Adding support accumulate boolean options.
   * [Cmds] Adding support verbose mode for provision action.
   * [Cmds] Refactoring `start`, `stop`, `scale` and `reload` to show more powerfull mensagens..
+  * [Cmds] Adding alias `adocker` to `azk docker`.
+  * [Systems] Adding a variables `AZK_*` to expose azk environment informations.
+  * [Manifest] Adding support `wait` directive in system declaration.
 
 ## v0.4.1 (2014-04-08)
 

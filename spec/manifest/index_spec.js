@@ -1,4 +1,4 @@
-import { t, fs, config } from 'azk';
+import { t, _, fs, config } from 'azk';
 import { Manifest, file_name } from 'azk/manifest';
 import { System } from 'azk/system';
 import { createSync as createCache } from 'fscache';
@@ -8,7 +8,7 @@ import h from 'spec/spec_helper';
 var default_img = config('docker:image_default');
 var path = require('path');
 
-describe("Azk manifest class", function() {
+describe("Azk manifest class, main set", function() {
   describe("in a valid azk project folder", function() {
     var project, manifest;
 
@@ -42,7 +42,7 @@ describe("Azk manifest class", function() {
 
     it("should set a default system", function() {
       h.expect(manifest).to.have.property('systemDefault')
-        .and.eql(manifest.system('example'));
+        .and.eql(manifest.system('api'));
     });
 
     it("should parse systems to System class", function() {
@@ -61,10 +61,44 @@ describe("Azk manifest class", function() {
       h.expect(func).to.throw(SystemNotFoundError, /not_found_system/);
     });
 
+    describe("implement getSystemsByName", function() {
+      it("should return all systems", function() {
+        var systems = manifest.getSystemsByName();
+        h.expect(systems).to.length(_.keys(manifest.systems).length);
+        h.expect(systems).to.has.deep.property("[0]").to.equal(
+          manifest.system("expand-test")
+        )
+        h.expect(systems).to.has.deep.property("[8]").to.equal(
+          manifest.system("example")
+        )
+      });
+
+      it("should raise error if get a not set system", function() {
+        var func = () => manifest.getSystemsByName("example,not_found_system");
+        h.expect(func).to.throw(SystemNotFoundError, /not_found_system/);
+      });
+
+      it("should return one system", function() {
+        var systems = manifest.getSystemsByName("example");
+        h.expect(systems).to.length(1);
+        h.expect(systems[0]).to.instanceOf(System);
+        h.expect(systems[0]).to.have.property("name", "example");
+      });
+
+      it("should return one or more systems", function() {
+        var systems = manifest.getSystemsByName("example,db");
+        h.expect(systems).to.length(2);
+        h.expect(systems).to.have.deep.property("[0]").and.instanceOf(System);
+        h.expect(systems).to.have.deep.property("[0].name", "db");
+        h.expect(systems).to.have.deep.property("[1]").and.instanceOf(System);
+        h.expect(systems).to.have.deep.property("[1].name", "example");
+      });
+    });
+
     describe("with a tree of the requireds systems", function() {
       it("should return a systems in required order", function() {
         h.expect(manifest.systemsInOrder()).to.eql(
-          ["expand-test", "mount-test", "ports-test", "test-image-opts", "empty", "db", "api", "example"]
+          ["expand-test", "mount-test", "ports-disable", "ports-test", "test-image-opts", "empty", "db", "api", "example"]
         )
       });
 
@@ -189,6 +223,14 @@ describe("Azk manifest class", function() {
       var func = mock_manifest("__not_exist()");
       h.expect(func).to.throw(ManifestError).and.match(
         /ReferenceError: __not_exist is not defined/
+      );
+    });
+
+    it("should raise invalid default system", function() {
+      var func = mock_manifest("setDefault('not_exist')");
+      var msg  = t('manifest.invalid_default', { system: "not_exist" });
+      h.expect(func).to.throw(ManifestError).and.match(
+        RegExp(h.escapeRegExp(msg))
       );
     });
   });

@@ -30,6 +30,12 @@ systems({
     workdir: "{{&workdir}}",
     {{~/if}}
     command: {{&json command}},
+    {{~#if mounts }}
+    mounts: {
+      {{~#each mounts}}
+      '{{&@key}}': {{&mount this}},{{/each}}
+    },
+    {{~/if}}
     {{~#if mount_folders}}
     // Mounts folders to assigned paths
     mount_folders: {
@@ -57,7 +63,7 @@ systems({
     ports: {
       // exports global variables
       {{~#each ports}}
-      {{&hash_key @key}}: "{{this}}",{{/each}}
+      {{&hash_key @key}}: {{&json this}},{{/each}}
     },
     {{~/if}}
     {{~#if envs}}
@@ -72,6 +78,23 @@ systems({
       // exports variables for dependent systems
       {{~#each export_envs}}
       {{&hash_key @key}}: "{{&this}}",{{/each}}
+    },
+    {{~/if}}
+    {{~#if docker_extra}}
+    docker_extra: {
+      // extra docker options
+      {{~#if docker_extra.create }}
+      create: {
+        {{~#each docker_extra.create }}
+        {{&hash_key @key}}: "{{&json this}}",{{/each}}
+      },
+      {{~/if}}
+      {{~#if docker_extra.start }}
+      start: {
+        {{~#each docker_extra.start }}
+        {{&hash_key @key}}: "{{&json this}}",{{/each}}
+      },
+      {{~/if}}
     },
     {{~/if}}
   },{{/each}}

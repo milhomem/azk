@@ -87,7 +87,7 @@ var Run = {
 
       options = _.defaults(options, {
         sequencies: yield this._getSequencies(system),
-        wait: true,
+        wait: system.wait_scale,
       });
 
       var docker_opt = system.daemonOptions(options);
@@ -110,10 +110,10 @@ var Run = {
 
           yield this._wait_available(system, port_data, container, retry, timeout);
         }
-
-        // Adding to balancer
-        yield Balancer.add(system, container);
       }
+
+      // Adding to balancer
+      yield Balancer.add(system, container);
 
       return container;
     });
@@ -174,8 +174,13 @@ var Run = {
         },
       };
 
-      notify(_.merge(port_data, { type: "wait_port", system: system.name, name: system.portName(port_data.name)}));
-      var running = yield net.waitService(host, port_data.port, retry, wait_opts);
+      notify(_.merge(port_data, {
+        name: system.portName(port_data.name),
+        type: "wait_port", system: system.name
+      }));
+
+      var address = `tcp://${host}:${port_data.port}`;
+      var running = yield net.waitService(address, retry, wait_opts);
 
       if (!running) {
         yield this.throwRunError(system, container, null, true);

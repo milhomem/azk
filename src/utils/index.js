@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join, basename, dirname } from 'path';
 import { i18n } from 'azk/utils/i18n';
 
 var crypto = require('crypto');
@@ -13,6 +13,11 @@ var Utils = {
   get Q()       { return Q; },
   get _()       { return _; },
   get net()     { return require('azk/utils/net').default },
+  get docker()  { return require('azk/utils/docker').default },
+
+  envs(key, defaultValue = null) {
+    return process.env[key] || defaultValue;
+  },
 
   cd(target, func) {
     var result, old = process.cwd();
@@ -25,8 +30,18 @@ var Utils = {
   },
 
   resolve(...path) {
-    return Utils.cd(join(...path), function() {
-      return process.cwd();
+    path = join(...path);
+
+    // Remove file from path
+    var file = "";
+    var stat = fs.statSync(path);
+    if (stat.isFile()) {
+      file = basename(path);
+      path = dirname(path);
+    }
+
+    return Utils.cd(path, function() {
+      return join(process.cwd(), file);
     });
   },
 

@@ -30,8 +30,10 @@ var Server = {
   stop() {
     return async(this, function* () {
       yield this.removeBalancer();
-      yield this.stopVM();
-      yield this.removeShare();
+      if (config('agent:requires_vm')) {
+        yield this.stopVM();
+        yield this.removeShare();
+      }
     });
   },
 
@@ -78,7 +80,8 @@ var Server = {
         // Wait for vm start
         var n = (status) => notify({ type: "status", context: "vm", status });
         n("wait");
-        var success = yield net_utils.waitService(config("agent:vm:ip"), 22, 10, { context: "vm" });
+        var address = `tcp://${config("agent:vm:ip")}:22`;
+        var success = yield net_utils.waitService(address, 10, { context: "vm" });
         if (!success) {
           throw new AgentStartError(t("errors.not_vm_start"));
         }
