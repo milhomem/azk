@@ -75,6 +75,17 @@ module.exports = function(grunt) {
           {expand: true, cwd: "./src/libexec/gpg", src: ['azuki.asc'], dest: "./keys/", stream: true },
         ],
       },
+      public_doc: {
+        options: {
+          bucket: "azk-docs-stage",
+        },
+        files: [{
+          expand: true,
+          cwd   : "./docs/build/html",
+          src   : ['**/*'],
+          stream: true,
+        }]
+      }
     },
 
     // Downloads
@@ -162,6 +173,9 @@ module.exports = function(grunt) {
       },
 
       docs: {
+        options: {
+          atBegin: true,
+        },
         files: [
           'Gruntfile.js',
           'docs/source/**/*.py',
@@ -179,10 +193,12 @@ module.exports = function(grunt) {
       },
       'public_mac_package': {
         'cmd': "grunt aws_s3:public_mac_package"
-      }
+      },
+      public_doc: {
+        'cmd': "grunt aws_s3:public_doc"
+      },
       build_doc: {
-        cmd: "azk",
-        args: ['shell', '-t', 'docs', '-c', 'rm -Rf build && ./bin/inve make html'],
+        cmd: "azk shell docs -t -c 'rm -Rf build && ./bin/inve make html'",
       }
     }
   });
@@ -197,12 +213,13 @@ module.exports = function(grunt) {
 
   grunt.registerTask('vm-download', [ 'curl-dir:brace-expansion' ]);
   grunt.registerTask('build_doc', ['clear', 'exec:build_doc']);
-  grunt.registerTask('docs', ['clear', 'build_doc', 'watch:docs']);
+  grunt.registerTask('docs', ['watch:docs']);
   grunt.registerTask('test', ['env:test', 'clear', 'newer:traceur', 'mochaTest:test']);
   grunt.registerTask('slow_test', ['env:test', 'clear', 'newer:traceur', 'mochaTest:slow_test']);
   grunt.registerTask('compile', ['watch:traceur']);
   grunt.registerTask('inspector', ["node-inspector"]);
   grunt.registerTask('public', ["env:aws", "exec:public_mac_package"]);
+  grunt.registerTask('public_docs', ["env:aws", "exec:public_doc"]);
   grunt.registerTask('default', function() {
     key_watch(grunt);
     return grunt.task.run(['watch:spec']);
