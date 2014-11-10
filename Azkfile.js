@@ -134,16 +134,16 @@ systems({
     command: "./bin/inve python index.py",
     // Mounts folders to assigned paths
     mounts: {
-      "/azk/#{manifest.dir}": path("./docs"),
+      "/azk/#{system.name}": path("./docs"),
       "/azk/pyenv": persistent('pyenv'),
-    }
+    },
     scalable: { default: 1 },
     http: {
       domains: [ "#{system.name}.azk.#{azk.default_domain}" ],
     },
     envs: {
       TERM: "xterm-256color",
-    }
+    },
   },
 });
 
