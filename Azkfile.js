@@ -117,34 +117,5 @@ systems({
       PATH: "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/azk/#{manifest.dir}/node_modules/.bin"
     }
   },
-
-  docs: {
-    // Dependent systems
-    depends: [],
-    provision: [
-      "virtualenv /azk/pyenv",
-      "./bin/inve pip install Sphinx",
-      "./bin/inve pip install --no-use-wheel CherryPy",
-      "./bin/inve pip install sphinx_rtd_theme",
-    ],
-    // More images:  http://images.azk.io
-    image: "azukiapp/python-pandoc",
-    workdir: "/azk/#{system.name}",
-    shell: "/bin/bash",
-    command: "./bin/inve python index.py",
-    // Mounts folders to assigned paths
-    mounts: {
-      "/azk/#{system.name}": path("./docs"),
-      "/azk/pyenv": persistent('pyenv'),
-    },
-    scalable: { default: 1 },
-    http: {
-      domains: [ "#{system.name}.azk.#{azk.default_domain}" ],
-    },
-    envs: {
-      TERM: "xterm-256color",
-    },
-  },
 });
 
-setDefault('docs');
