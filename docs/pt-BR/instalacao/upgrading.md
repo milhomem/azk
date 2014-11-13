@@ -56,3 +56,8 @@ For those who have tested it before (pior to this beta version), please perform 
   ```
 
 5. Now you are able to install new `azk` version.
+
+  * [Linux](linux.md)
+  * [Mac OS X](mac_os_x.md)
+
+!INCLUDE "../links.md"

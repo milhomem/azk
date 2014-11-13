@@ -10,10 +10,10 @@ If you are running a service on ports `80` or/and `53` you can customize the con
 
 1. Install docker
 
-  - [install **latest version of Docker**](https://docs.docker.com/installation/ubuntulinux/#installation)
+  - [install **latest version of Docker**][docker_ubuntu_14_04]
   - check if docker service is running;
-  - configure your user [giving non root access](https://docs.docker.com/installation/ubuntulinux/#giving-non-root-access);
-  - [fix dns service](https://docs.docker.com/installation/ubuntulinux/#docker-and-local-dns-server-warnings);
+  - configure your user [giving non root access][docker_root_access];
+  - [fix dns service][docker_ubuntu_dns];
 
 2. Then, add the Azuki repository key to your local keychain.
 
@@ -40,9 +40,9 @@ If you are running a service on ports `80` or/and `53` you can customize the con
 
 1. Install docker
 
-  - [install **latest version of Docker**](https://docs.docker.com/installation/ubuntulinux/#ubuntu-precise-1204-lts-64-bit)
+  - [install **latest version of Docker**][docker_ubuntu_12_04]
   - check if docker service is running;
-  - [giving non root access](https://docs.docker.com/installation/ubuntulinux/#giving-non-root-access) for yours user;
+  - [giving non root access][docker_root_access] for yours user;
 
 
 2. Then, add the Azuki repository key to your local keychain.
@@ -95,15 +95,15 @@ If you are running a service on ports `80` or/and `53` you can customize the con
 4. Before run `azk agent`:
 
   - check if docker service is running;
-  - [giving non root access](https://docs.docker.com/installation/ubuntulinux/#giving-non-root-access) for yours user;
+  - [giving non root access][docker_root_access] for yours user;
 
 ## Other distributions - installation from source
 
 1. Install docker
 
-  - [install **latest version of Docker**](https://docs.docker.com/installation/#installation)
+  - [install **latest version of Docker**][docker_install]
   - check if docker service is running;
-  - [giving non root access](https://docs.docker.com/installation/ubuntulinux/#giving-non-root-access) for yours user;
+  - [giving non root access][docker_root_access] for yours user;
 
 2. Install [libnss-resolver][libnss-resolver] dependency;
 
@@ -132,3 +132,6 @@ If you are running a service on ports `80` or/and `53` you can customize the con
   ```bash
   $ azk agent start
   ```
+
+!INCLUDE "../comecando/banner.md"
+!INCLUDE "../links.md"
