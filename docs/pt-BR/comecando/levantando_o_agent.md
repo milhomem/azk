@@ -14,15 +14,4 @@ A saída deve variar um pouco conforme a plataforma (Linux ou Mac). Mas no geral
 
 Um exemplo de saída para o comando:
 
-```bash
-azk: Wait, this process may take several minutes
-azk: Loading settings and checking dependencies.
-azk: Checking version...
-azk: Settings loaded successfully.
-...
-azk: Memcached service started.
-azk: Starting http balancer service...
-azk: Http balancer service started.
-azk: Agent has been successfully started.
-```
-
+![Figure 1-1](../images/agent_start.png)

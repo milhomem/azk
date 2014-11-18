@@ -1,6 +1,6 @@
 # Começando
 
-Antes de começar tenha certeza de ter [instalado o azk](../instalacao/README.md)
+Antes de começar, tenha certeza de ter [instalado o azk](../instalacao/README.md).
 
 Este guia vai orientá-lo através dos primeiros passos no uso do `azk`, demonstrando os conceitos básicos sobre as principais características do `azk`.
 

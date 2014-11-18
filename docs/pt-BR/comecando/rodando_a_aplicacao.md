@@ -30,4 +30,4 @@ azk: ◴ waiting start `azkdemo` system, try connect port http/tcp...
 
 Se tudo ocorreu conforme o esperado agora você pode acessar [http://azkdemo.azk.dev](http://azkdemo.azk.dev) e a seguinte tela deve aparecer:
 
-![Figure 1-1](images/start_1.png)
+![Figure 1-1](../images/start_1.png)

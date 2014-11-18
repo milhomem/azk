@@ -9,6 +9,6 @@ A instalação vai adicionar o comando `azk` ao path do sistemas. Isso torna o c
 * Um máquina com arquitetura 64 bits
 * Mac OS X ou Linux (Windows: planned)
 * bash (ferramenta de linha de comando disponível em praticamente todo sistemas unix)
-* Conexão com a internet (apenas durante o processo de download das [imagens][../images/README.md])
+* Conexão com a internet (apenas durante o processo de download das [imagens](../imagens/README.md))
 
 !INCLUDE "../comecando/banner.md"

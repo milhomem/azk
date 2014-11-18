@@ -1,4 +1,4 @@
-# Mapeando os arquivos
+# Mapeando arquivos
 
 Se observamos o `Azkfile.js` gerado é possível notar uma entrada no sistemas `azkdemo` chamada `mounts`:
 
@@ -20,17 +20,7 @@ Esta entrada basicamente orienta o `azk` sobre quais arquivos locais devem estar
 
 Se acessarmos o shell do sistema `azkdemo` é possível listar os arquivos da pasta `azkdemo` conforme o esperado:
 
-```bash
-$ azk shell azkdemo
-[ root@3848e1df91cf:/azk/azkdemo ]$ ls -l
-total 16
--rw-r--r-- 1 root root  814 Nov 17 20:14 Azkfile.js
--rw-r--r-- 1 root root 2822 Nov 17 18:42 README.md
--rw-r--r-- 1 root root 1477 Nov 17 20:20 index.js
-drwxr-xr-x 6 root root  204 Nov 17 20:08 node_modules
--rw-r--r-- 1 root root  282 Nov 17 18:42 package.json
-drwxr-xr-x 3 root root  102 Nov 17 18:42 public
-```
+![Figure 1-1](../images/ls.png)
 
 Observe que ao chamar o `azk shell` você foi enviado a pasta `/azk/azkdemo`, esse path corresponde a entrada `workdir` do Azkfile.js, que tem o valor: `/azk/#{system.name}`.
 

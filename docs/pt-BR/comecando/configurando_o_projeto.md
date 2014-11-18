@@ -10,10 +10,6 @@ $ azk init
 
 azk: A system of the `node.js` type found in '[path_demo]/azkiso'
 azk: 'Azkfile.js' generated
-
-Tip:
-  Adds the `.azk` in .gitignore
-  echo '.azk' >> .gitignore
 ```
 
 Isso deve gerar o `Azkfile.js`:
@@ -31,6 +27,7 @@ systems({
       "npm install",
     ],
     workdir: "/azk/#{manifest.dir}",
+    shell: "/bin/bash",
     command: "node index.js",
     mounts: {
       '/azk/#{manifest.dir}': path("."),

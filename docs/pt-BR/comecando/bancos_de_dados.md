@@ -86,4 +86,4 @@ azk: ◴ waiting start `azkdemo` system, try connect port http/tcp...
 
 Acessando [http://azkdemo.azk.dev](http://azkdemo.azk.dev), você deve obter:
 
-![Figure 1-1](images/start_2.png)
+![Figure 1-1](../images/start_2.png)
