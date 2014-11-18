@@ -1,10 +1,14 @@
 # Linux
 
+**Aviso**: Se você você já tem o `azk` nas versões anteriores ao `0.6.0` instalado, siga [esses passos](upgrading.md#atualizando-a-partir-azk--051) antes de continuar. Se você não tem o `azk` instalado ignorar este aviso e continuar a instalação normalmente.
+
+## Requisitos
+
 * Distribution (tested): Ubuntu 12.04/14.04 and Fedora20
 * [Docker][docker] 1.1.0 or greater
 * Not running any service in `80` and `53` ports
 
-If you are running a service on ports `80` or/and `53` you can customize the configuration by setting the environment variable `AZK_BALANCER_PORT` and `AZK_DNS_PORT` respectively before run `azk agent start`.
+**Importante**: If you are running a service on ports `80` or/and `53` you can customize the configuration by setting the environment variable `AZK_BALANCER_PORT` and `AZK_DNS_PORT` respectively before run `azk agent start`.
 
 ## Ubuntu Trusty 14.04 (LTS) (64-bit)
 
@@ -134,4 +138,4 @@ If you are running a service on ports `80` or/and `53` you can customize the con
   ```
 
 !INCLUDE "../comecando/banner.md"
-!INCLUDE "../links.md"
+!INCLUDE "../../links.md"

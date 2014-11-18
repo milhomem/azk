@@ -1,6 +1,6 @@
 # Mac OS X
 
-**Aviso**: Se você você já tem o `azk` nas versões antetiores ao `0.6.0` instalado, siga [esses passos](upgrading.md) antes de continuar.
+**Aviso**: Se você você já tem o `azk` nas versões anteriores ao `0.6.0` instalado, siga [esses passos](upgrading.md#atualizando-a-partir-azk--051) antes de continuar. Se você não tem o `azk` instalado ignorar este aviso e continuar a instalação normalmente.
 
 ## Requisitos
 
@@ -31,4 +31,4 @@ $ brew upgrade azk
 ```
 
 !INCLUDE "../comecando/banner.md"
-!INCLUDE "../links.md"
+!INCLUDE "../../links.md"

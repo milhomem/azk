@@ -1,4 +1,30 @@
-# Upgrading from azk 0.5.1
+# Atualizando a partir azk >= 0.6.0
+
+## Mac OS X
+
+```bash
+$ azk agent stop
+$ brew upgrade azukiapp/azk/azk
+```
+
+## Linux
+
+Ubuntu:
+
+```bash
+$ azk agent stop
+$ sudo apt-get update
+$ sudo apt-get upgrade azk
+```
+
+Fedora:
+
+```bash
+$ azk agent stop
+$ sudo yum upgrade azk
+```
+
+# Atualizando a partir azk <= 0.5.1
 
 Until recently, version `0.6.0` was still an alpha version, but now it has reached a maturity level that makes it a beta version (now it can be installed and updated by installation packages).
 
@@ -57,7 +83,7 @@ For those who have tested it before (pior to this beta version), please perform 
 
 5. Now you are able to install new `azk` version.
 
-  * [Linux](linux.md)
-  * [Mac OS X](mac_os_x.md)
+  * [Linux](linux.md#requisitos)
+  * [Mac OS X](mac_os_x.md#requisitos)
 
-!INCLUDE "../links.md"
+!INCLUDE "../../links.md"

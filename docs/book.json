@@ -1,6 +1,7 @@
 {
     "plugins": [
-        "anchors"
+      "anchors",
+      "include"
     ],
     "links": {
         "home": "http://azk.io",

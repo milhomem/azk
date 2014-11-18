@@ -8,7 +8,9 @@ Para garantir que o `azk agent` **esteja em execução**, você deve executar o 
 $ azk agent start
 ```
 
-A saída deve variar conforme a plataforma (Linux ou Mac). Mas no geral deve se esperar pela mensagem **"Agent has been successfully started"**, para só então dar continuidade neste guia.
+A saída deve variar um pouco conforme a plataforma (Linux ou Mac). Mas no geral deve se esperar pela mensagem **"Agent has been successfully started"**, para só então dar continuidade neste guia.
+
+**Importante**: Nunca execute o `azk agent start` como super usuário (nem mesmo usando sudo), isso pode gerar um estado inconsistente que pode levar o `azk agent` a não funcionar. Mais informações [aqui](../faq/README.md#not_root_access).
 
 Um exemplo de saída para o comando:
 
