@@ -12,7 +12,7 @@ systems({
   },
   // Adicione a entrada para o sistemas redis
   redis: {
-    image: "dockerfile/redis",
+    image: "redis",
     export_envs: {
       "DATABASE_URL": "redis://#{net.host}:#{net.port[6379]}"
     }

@@ -1,5 +1,7 @@
 # Introdução
 
+![Figure 1-1](./images/logo.png)
+
 Bem vindo a documentação do `azk`! Esta documentação vai lhe ajudar a começar a utilizar do `azk`, mais também pode ser utilizada como material referencias para opções e formas de utilizar o `azk'.
 
 # Sobre

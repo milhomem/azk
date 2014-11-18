@@ -1,6 +1,6 @@
 # Instalação
 
-Instalar o `azk` é realmente muito simples e pode ser feita através de pacotes, tanto no [Linux](linux.md) quando [Mac OS X](mac_os_x.md).
+A instalação do `azk` é realmente muito simples, esta disponível através de pacotres no [Linux](linux.md) e no [Mac OS X](mac_os_x.md).
 
 A instalação vai adicionar o comando `azk` ao path do sistemas. Isso torna o comando `azk` disponível no terminal.
 
@@ -11,4 +11,4 @@ A instalação vai adicionar o comando `azk` ao path do sistemas. Isso torna o c
 * bash (ferramenta de linha de comando disponível em praticamente todo sistemas unix)
 * Conexão com a internet (apenas durante o processo de download das [imagens](../imagens/README.md))
 
-!INCLUDE "../comecando/banner.md"
+!INCLUDE "../getting-started/banner.md"

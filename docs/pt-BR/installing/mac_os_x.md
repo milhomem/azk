@@ -22,13 +22,5 @@ Após instalar o VirtualBox abra o console e digite:
 $ brew install azukiapp/azk/azk
 ```
 
-## Atualizando o azk
-
-Se você já instalou o `azk` através do brew em uma versão antetior, basta rodar os seq
-
-```bash
-$ brew upgrade azk
-```
-
-!INCLUDE "../comecando/banner.md"
+!INCLUDE "../getting-started/banner.md"
 !INCLUDE "../../links.md"

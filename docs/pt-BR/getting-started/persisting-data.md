@@ -1,6 +1,6 @@
 # Persistindo informações
 
-Se você [configurou um banco de dados](bancos_de_dados.md), verá que vários refresh na página [http://azkdemo.azk.dev](http://azkdemo.azk.dev), fazem com que nosso contador de acessos seja incrementado. Porém se você fizer um restart:
+Se você [configurou um banco de dados](database.md), verá que vários refresh na página [http://azkdemo.azk.dev](http://azkdemo.azk.dev), fazem com que nosso contador de acessos seja incrementado. Porém se você fizer um restart:
 
 ```bash
 $ azk restart redis
@@ -11,7 +11,7 @@ Isso acontece porque o banco de dados não sabe onde persistir a informação so
 
 ## Volume persistente
 
-Para adicionarmos persistência ao banco de dados precisamos editar o `Azkfile.js` e adicionar uma entrada `mounts` ao sistemas `redis` conforme o exemplo:
+Para adicionarmos persistência ao banco de dados precisamos editar o `Azkfile.js` adicionando as entradas `command` e `mounts` ao sistemas `redis` conforme o exemplo:
 
 ```js
 systems({
@@ -19,8 +19,9 @@ systems({
     // ...
   },
   redis: {
-    image: "dockerfile/redis",
+    image: "redis",
     // adicione
+    command: "redis-server --appendonly yes",
     mounts: {
       "/data": persistent("data"),
     },

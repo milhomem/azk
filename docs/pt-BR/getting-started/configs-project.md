@@ -8,7 +8,7 @@ O `Azkfile.js` pode ser criado manualmente, mas para sua comodidade oferecemos o
 $ cd [path_demo]/azkdemo
 $ azk init
 
-azk: A system of the `node.js` type found in '[path_demo]/azkiso'
+azk: `node` system was detected at '[path_demo]/azkdemo'
 azk: 'Azkfile.js' generated
 ```
 
@@ -21,14 +21,15 @@ systems({
     // Dependent systems
     depends: [],
     // More images: http://images.azk.io
-    image: "dockerfile/nodejs",
+    image: "node:0.10",
     // Steps to execute before running instances
     provision: [
       "npm install",
     ],
     workdir: "/azk/#{manifest.dir}",
     shell: "/bin/bash",
-    command: "node index.js",
+    command: "npm start",
+    wait: { retry: 20, timeout: 1000 },
     mounts: {
       '/azk/#{manifest.dir}': path("."),
     },

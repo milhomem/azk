@@ -6,7 +6,7 @@ Se observamos o `Azkfile.js` gerado é possível notar uma entrada no sistemas `
 systems({
   azkdemo: {
     // ...
-    command: "node index.js",
+    command: "npm start",
     mounts: {
       '/azk/#{manifest.dir}': path("."),
     },
